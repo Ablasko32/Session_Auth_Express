@@ -1,0 +1,38 @@
+services:
+  db:
+    container_name: postgre_database
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: auth
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/db:/docker-entrypoint-initdb.d
+
+  redis:
+    container_name: redis_database
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  server:
+    container_name: auth_api
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - ./backend/.env
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
+  redis_data:
